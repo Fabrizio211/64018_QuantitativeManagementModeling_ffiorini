@@ -1,0 +1,101 @@
+---
+title: "Assignment 2"
+author: "Fabrizio Fiorini"
+date: "9/29/2021"
+output: html_document
+---
+
+
+## Loading the necessary libraries
+
+```{r}
+library(lpSolveAPI)
+```
+
+## Create LP Model objects
+
+```{r}
+# make an lp object with 11 constraints and  9 decision variables
+lprec <- make.lp(11, 9)
+```
+
+
+## Objective function and Constraints
+
+```{r}
+# Now create the objective function. The default is a minimization problem,
+# therefore, we need to modify the model to find a maximization solution. 
+set.objfn(lprec, c(420, 360, 300, 420, 360, 300, 420, 360, 300))
+lp.control(lprec, sense = "max")
+```
+
+
+```{r}
+# set values for the rows of constraint coefficients
+
+# sales constraints
+set.row(lprec, 1, c(1, 1, 1), indices = c(1, 4, 7))
+set.row(lprec, 2, c(1, 1, 1), indices = c(2, 5, 8))
+set.row(lprec, 3, c(1, 1, 1), indices = c(3, 6, 9))
+# sq.feet constraints
+set.row(lprec, 4, c(20, 15, 12), indices = c(1, 2, 3))
+set.row(lprec, 5, c(20, 15, 12), indices = c(4, 5, 6))
+set.row(lprec, 6, c(20, 15, 12), indices = c(7, 8, 9))
+# excess capacity constraints
+set.row(lprec, 7, c(1, 1, 1), indices = c(1, 2, 3))
+set.row(lprec, 8, c(1, 1, 1), indices = c(4, 5, 6))
+set.row(lprec, 9, c(1, 1, 1), indices = c(7, 8, 9))
+# same % capacity usage
+set.row(lprec, 10, c(900, 900, 900, -750, -750, -750), indices = c(1, 2, 3, 4, 5, 6))
+set.row(lprec, 11, c(450, 450, 450, -900, -900, -900), indices = c(4, 5, 6, 7, 8, 9))
+```
+
+
+```{r}
+# set right hand side of constraints
+rhs <- c(900, 1200, 750, 13000, 12000, 5000, 750, 900, 450, 0, 0)
+set.rhs(lprec, rhs)
+```
+
+
+```{r}
+# set constraint types
+set.constr.type(lprec, c("<=", "<=", "<=", "<=", "<=", "<=", "<=", "<=", "<=", "=", "="))
+```
+
+
+```{r}
+## name the decision variables (column) and constraints (rows)
+lp.rownames <- c("Sales Large", "Sales Medium", "Sales Small", "sq.ft Plant1", "sq.ft Plant2", "sq.ft Plant3", "ex.cap. Plant1", "ex.cap. Plant2", "ex.cap.Plant3", "% capacity usage Plant1/2", "% capacity usage Plant2/3")
+lp.colnames <- c("Plant1-Large", "Plant1-Medium", "Plant1-Small", "Plant2-Large", "Plant2-Medium", "Plant2-Small", "Plant3-Large", "Plant3-Medium", "Plant3-Small")
+dimnames(lprec) <- list(lp.rownames, lp.colnames)
+```
+
+
+```{r}
+# view the linear program object to make sure it's correct
+lprec
+```
+
+## Solve the model and get the results
+
+```{r}
+solve(lprec)
+```
+Notice that here we have zero as result of the above code. It does not mean that the solution of our problem is zero or null, but it is a code that tells us "optimal solution found". This is what we wanted. Now, let us look at the variables coefficients and the maximum profit.
+
+
+```{r}
+# Review results
+get.objective(lprec)
+get.variables(lprec)
+```
+
+
+From the results we can understand what is the optimal production mix among the 3 product sizes and the 3 plants in order to obtain the maximum profit.
+According to the model solution:
+- in Plant 1 the company should produce 517 Large size and 178 Medium size.
+- in Plant 2 it should produce 667 Medium size and 167 Small size.
+- in Plant 3 it should produce exclusively 417 Small size.
+With this production levels the company would register an expected profit of $696,000.
+
