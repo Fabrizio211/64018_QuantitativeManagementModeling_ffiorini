@@ -1,0 +1,92 @@
+---
+title: "Assignment 4 - Transportation problem and Network Model"
+author: "Fabrizio Fiorini"
+date: "10/22/2021"
+output: html_document
+---
+
+# Part 1 - Transportation problem
+
+## Loading the necessary libraries
+
+```{r}
+setwd("C:/Users/Fabrizio/Desktop/MyBlackBoard/MIS 64018 - Quant. Management Modeling/Module 7 -  Network Models/Assignment 4")
+library(lpSolveAPI)
+```
+
+## Introduction
+
+Heart Start produces automated external defibrillators (AEDs) in each of two different plants (A and B)The AEDs are sold through three wholesalers. 
+How many AEDs should be produced in each plant, and how should they be distributed to each of the three wholesaler warehouses so as to minimize the combined cost of production and shipping?
+
+
+## Solve the LP Model
+
+In this assignment, we chose to write the problem formulation in the lp format, a text file created specifically for this problem, that includes all the information. 
+
+```{r}
+x <- read.lp("Heart_Start.lp")
+x
+```
+
+Now that the file has been read by R, we can solve it.
+
+```{r}
+solve(x)
+```
+
+Here, zero means that R found an optimal solution.
+
+```{r}
+get.objective(x)
+get.variables(x)
+```
+
+From the results we know that the optimal solution is reach with a minimum total cost of $132,790. The total production from Plant A and B is, respectively, 100 and 110. Moreover, 40 AEDs are produced in Plant A and shipped to Warehouse 2, 60 are produced in plant A and shipped warehouse 2, 40 are produced in plant B and shipped to warehouse 1, and finally 70 are produced in plant B and shipped to warehouse 3.
+
+```{r}
+get.constraints(x)
+```
+
+These are the RHS values for our 5 constraints.
+
+
+
+# Part 2 - Network Model
+
+Since there is a difference between total supply (276TBD) and total demand(274TBD), we will introduce a dummy variable, Refinery 6 (R6), that will demand 2TBD.
+
+Objective Function (minimization problem):
+
+Z = 1.52 Xw1pa + 1.60 Xw1pb + 1.40 Xw1pc + 1.70 Xw2pa + 1.63 Xw2pb + 1.55 Xw2pc + 1.45 Xw3pa +
+1.57 Xw3pb + 1.30 Xw3pc + 5.15 Xpar1 + 5.69 Xpar2 + 6.13 Xpar3 + 5.63 Xpar4 + 5.80 Xpar5 + 5.12
+Xpbr1 + 5.47 Xpbr2 + 6.05 Xpbr3 + 6.12 Xpbr4 + 5.71 Xpbr5 + 5.32Xpcr1 + 6.16 Xpcr2 + 6.25 Xpcr3 +
+6.17 Xpcr4 + 5.87 Xpcr5
+
+Constraints:
+
+Supply/Capacity Constraints:
+
+Xw1pa + Xw1pb + Xw1pc = 93
+Xw2pa + Xw2pb + Xw2pc = 88
+Xw3pa + Xw3pb + Xw3pc = 95
+
+Demand/Requirement Constraints:
+
+Xpar1 + Xpbr1 + Xpcr1 = 30
+Xpar2 + Xpbr2 + Xpcr2 = 57
+Xpar3 + Xpbr3 + Xpcr3 = 48
+Xpar4 + Xpbr4 + Xpcr4 = 91
+Xpar5 + Xpbr5 + Xpcr5 = 48
+Xpar6 + Xpbr6 + Xpcr6 = 2
+
+Constraints from pumps to the refineries:
+
+Xw1pa + Xw2pa + Xw3pa + Xpar1 + Xpar2 + Xpar3 + Xpar4 + Xpar5 + Xpar6 = 0
+Xw1pb + Xw2pb + Xw3pb + Xpbr1 + Xpbr2 + Xpbr3 + Xpbr4 + Xpbr5 + Xpbr6 = 0
+Xw1pc + Xw2pc + Xw3pc + Xpcr1 + Xpcr2 + Xpcr3 + Xpcr4 + Xpcr5 + Xpcr6 = 0
+
+Non-negativity constraints:
+
+Xij >= 0 (i = w1,w2,w3 ; j = pa,pb,pc)
+Xjk >= 0 (j = pa,pb,pc ; k = r1,r2,r3,r4,r5,r6)
