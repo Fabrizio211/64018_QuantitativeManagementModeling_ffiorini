@@ -1,0 +1,52 @@
+---
+title: "Assignment 4"
+author: "Fabrizio Fiorini"
+date: "10/22/2021"
+output: html_document
+---
+
+# Transportation problem and Network Model
+
+## Loading the necessary libraries
+
+```{r}
+setwd("C:/Users/Fabrizio/Desktop/MyBlackBoard/MIS 64018 - Quant. Management Modeling/Module 7 -  Network Models/Assignment 4")
+library(lpSolveAPI)
+```
+
+## Introduction
+
+Heart Start produces automated external defibrillators (AEDs) in each of two different plants (A and B)The AEDs are sold through three wholesalers. 
+How many AEDs should be produced in each plant, and how should they be distributed to each of the three wholesaler warehouses so as to minimize the combined cost of production and shipping?
+
+
+## Solve the LP Model
+
+In this assignment, we chose to write the problem formulation in the lp format, a text file created specifically for this problem, that includes all the information. 
+
+```{r}
+x <- read.lp("Heart_Start.lp")
+x
+```
+
+Now that the file has been read by R, we can solve it.
+
+```{r}
+solve(x)
+```
+
+Here, zero means that R found an optimal solution.
+
+```{r}
+get.objective(x)
+get.variables(x)
+```
+
+From the results we know that the optimal solution is reach with a minimum total cost of $132,790 with 60 AEDs to be produced by plant A and sent to Warehouse 2, 40 in plant A and sent to warehouse 3, 80 in plant B and sent to warehouse 1, and 30 in plant B and sent to warehouse 3.
+
+```{r}
+get.constraints(x)
+```
+
+These are the RHS values for our 6 constraints.
+
